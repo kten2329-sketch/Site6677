@@ -1,0 +1,269 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <title>Trích Xuất User ID</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .box {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 25px 20px;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        h2 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 20px;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 18px;
+            border: 3px solid #667eea;
+            border-radius: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            margin: 15px 0;
+            resize: vertical;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        button {
+            flex: 1;
+            min-width: 140px;
+            padding: 18px 10px;
+            border: none;
+            border-radius: 60px;
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .btn-lay {
+            background: #667eea;
+        }
+        .btn-xoa {
+            background: #f56565;
+        }
+        .btn-copy {
+            background: #48bb78;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 20px;
+            border: 2px solid #e0e0e0;
+        }
+        .count {
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 22px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        #list {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            border: 1px solid #ddd;
+        }
+        .user-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            word-break: break-all;
+            font-size: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            font-size: 18px;
+        }
+        ::placeholder {
+            font-size: 20px;
+            color: #999;
+        }
+        #copyStatus {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        .status-success {
+            background: #48bb78;
+            color: white;
+        }
+        .status-error {
+            background: #f56565;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>🔍 TRÍCH XUẤT USER ID</h2>
+        
+        <textarea id="data" placeholder="📱 Dán dữ liệu user vào đây..."></textarea>
+        
+        <div class="btn-group">
+            <button class="btn-lay" onclick="layUser()">📋 LẤY USER</button>
+            <button class="btn-xoa" onclick="xoa()">🗑️ XÓA</button>
+            <button class="btn-copy" onclick="copyList()">📎 COPY</button>
+        </div>
+        
+        <div id="copyStatus"></div>
+        
+        <div class="result">
+            <div>
+                <span id="count" class="count">0 user</span>
+            </div>
+            <div id="list">
+                <span style="color: #999; font-size: 20px;">📌 Chưa có dữ liệu...</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            ⚡ Dán dữ liệu vào ô trên - Tự động lấy user ID
+        </div>
+    </div>
+
+    <script>
+        // Tự động lấy user khi paste
+        document.getElementById('data').addEventListener('paste', function() {
+            setTimeout(layUser, 100);
+        });
+
+        function layUser() {
+            let data = document.getElementById('data').value;
+            let lines = data.split('\n');
+            let users = [];
+            
+            for(let line of lines) {
+                let match = line.match(/user\d+/g);
+                if(match) {
+                    for(let m of match) {
+                        users.push(m);
+                    }
+                }
+            }
+            
+            // Lọc trùng
+            users = [...new Set(users)];
+            
+            // Hiển thị user KHÔNG có số thứ tự
+            let html = '';
+            for(let i = 0; i < users.length; i++) {
+                html += '<div class="user-item" data-user="' + users[i] + '">' + users[i] + '</div>';
+            }
+            
+            document.getElementById('list').innerHTML = html || '<span style="color: #999; font-size: 20px;">❌ Không tìm thấy user...</span>';
+            document.getElementById('count').innerHTML = users.length + ' user';
+            
+            // Ẩn status cũ
+            document.getElementById('copyStatus').style.display = 'none';
+        }
+        
+        function xoa() {
+            document.getElementById('data').value = '';
+            document.getElementById('list').innerHTML = '<span style="color: #999; font-size: 20px;">📌 Chưa có dữ liệu...</span>';
+            document.getElementById('count').innerHTML = '0 user';
+            document.getElementById('copyStatus').style.display = 'none';
+        }
+        
+        function copyList() {
+            let items = document.querySelectorAll('.user-item');
+            let statusDiv = document.getElementById('copyStatus');
+            
+            if(items.length === 0) {
+                statusDiv.className = 'status-error';
+                statusDiv.innerHTML = '❌ Không có user để copy!';
+                statusDiv.style.display = 'block';
+                
+                // Tự động ẩn sau 3 giây
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+                return;
+            }
+            
+            // Tạo text để copy - KHÔNG có số thứ tự
+            let text = '';
+            for(let item of items) {
+                text += item.innerText + '\n';
+            }
+            text = text.trim();
+            
+            // Copy vào clipboard
+            navigator.clipboard.writeText(text).then(() => {
+                // Hiển thị trạng thái thành công
+                statusDiv.className = 'status-success';
+                statusDiv.innerHTML = '✅ Đã copy ' + items.length + ' user thành công!';
+                statusDiv.style.display = 'block';
+                
+                // Tự động ẩn sau 3 giây
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            }).catch((err) => {
+                // Fallback cho trình duyệt cũ
+                let textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                statusDiv.className = 'status-success';
+                statusDiv.innerHTML = '✅ Đã copy ' + items.length + ' user thành công!';
+                statusDiv.style.display = 'block';
+                
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>
